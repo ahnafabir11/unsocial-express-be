@@ -1,4 +1,5 @@
 import express from 'express';
+import { router } from '@/routes';
 
 // define cors options
 
@@ -19,5 +20,6 @@ app.get('/', async (req, res) => {
 });
 
 // routes
+app.use('/api/v1', router);
 
 export { app };
