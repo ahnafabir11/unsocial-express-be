@@ -23,6 +23,7 @@ model User {
   password       String
   coverPicture   String?
   profilePicture String?
+  verified       Boolean  @default(false)
   createdAt      DateTime @default(now())
   followers      Follow[] @relation("Followers")
   followings     Follow[] @relation("Followings")
