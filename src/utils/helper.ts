@@ -17,3 +17,15 @@ export const generateToken = (data: string | object | Buffer, options?: jwt.Sign
 export const verifyToken = (token: string) => {
   return jwt.verify(token, config.jwtSecret);
 };
+
+type ExcludeFields<T, K extends keyof T> = {
+  [P in Exclude<keyof T, K>]: T[P];
+};
+
+export const excludeFields = <T, K extends keyof T>(obj: T, fieldsToExclude: K[]): ExcludeFields<T, K> => {
+  const result = { ...obj };
+  fieldsToExclude.forEach((field) => {
+    delete result[field];
+  });
+  return result;
+};

@@ -13,3 +13,10 @@ export const signupBodySchema = z
   });
 
 export type SignupBodyType = z.infer<typeof signupBodySchema>;
+
+export const loginBodySchema = z.object({
+  email: z.string().toLowerCase().email(),
+  password: z.string().trim().min(6),
+});
+
+export type LoginBodyType = z.infer<typeof signupBodySchema>;

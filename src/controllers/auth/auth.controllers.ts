@@ -1,8 +1,8 @@
 import { config } from '@/app/config';
 import { db } from '@/app/prisma';
 import { resend } from '@/app/resend';
-import { generateToken, hashPassword } from '@/utils/helper';
-import { signupBodySchema } from '@/validators/auth.validator';
+import { comparePassword, excludeFields, generateToken, hashPassword } from '@/utils/helper';
+import { loginBodySchema, signupBodySchema } from '@/validators/auth.validator';
 import { Request, Response } from 'express';
 
 export const signupController = async (req: Request, res: Response) => {
@@ -21,7 +21,7 @@ export const signupController = async (req: Request, res: Response) => {
     // CHECKING IF EMAIL ALREADY EXIST
     const hasUser = await db.user.findFirst({ where: { email } });
 
-    // SENDING ERROR AS FIELD ERROR
+    // SENDING ERROR RESPONSE AS FIELD ERROR
     if (hasUser) {
       return res.status(400).json({ message: 'VALIDATION_ERROR', data: { email: ['Email already exist!'] } });
     }
@@ -68,7 +68,42 @@ export const signupController = async (req: Request, res: Response) => {
 
 export const loginController = async (req: Request, res: Response) => {
   try {
-    return res.status(200).json({ message: 'You are logged in', data: {} });
+    // VALIDATING REQUEST BODY
+    const validation = loginBodySchema.safeParse(req.body);
+
+    // SENDING ERROR RESPONSE FOR VALIDATION ERROR
+    if (!validation.success) {
+      const errors = validation.error.flatten().fieldErrors;
+      return res.status(400).json({ message: 'VALIDATION_ERROR', data: errors });
+    }
+
+    const { email, password } = validation.data;
+
+    // CHECKING IF EMAIL ALREADY EXIST
+    const user = await db.user.findFirst({ where: { email } });
+
+    // SENDING ERROR RESPONSE AS FIELD ERROR
+    if (!user) {
+      return res.status(400).json({ message: 'VALIDATION_ERROR', data: { email: ["Email doesn't exist!"] } });
+    }
+
+    // USER FOUND
+    // CHECKING IF PASSWORD MATCHES
+    const passwordMatched = await comparePassword(password, user.password);
+
+    // PASSWORD DIDN'T MATCH
+    // SENDING ERROR RESPONSE AS VALIDATION ERROR
+    if (!passwordMatched) {
+      return res.status(400).json({ message: 'VALIDATION_ERROR', data: { password: ["Password didn't match!"] } });
+    }
+
+    // PASSWORD MATCHED
+    // GENERATING TOKEN FOR COOKIE
+    const token = generateToken({ id: user.id, email: user.email });
+
+    const _user = excludeFields(user, ['password']);
+
+    return res.status(200).cookie('token', token, { httpOnly: true }).json({ message: 'You are logged in', data: _user });
   } catch (e) {
     return res.status(400).json({ message: 'INTERNAL_SERVER_ERROR', data: e });
   }
