@@ -25,6 +25,8 @@ model User {
   profilePicture String?
   verified       Boolean  @default(false)
   createdAt      DateTime @default(now())
+  followerCount  Int      @default(0)
+  followingCount Int      @default(0)
   followers      Follow[] @relation("Followers")
   followings     Follow[] @relation("Followings")
 }
