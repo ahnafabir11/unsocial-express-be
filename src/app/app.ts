@@ -1,5 +1,6 @@
 import express from 'express';
 import { router } from '@/routes';
+import cookieParser from 'cookie-parser';
 
 // define cors options
 
@@ -9,6 +10,7 @@ const app = express();
 // initialize necessary middlewares
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
 
 // testing endpoint
 app.get('/', async (req, res) => {
