@@ -128,3 +128,12 @@ export const meController = async (req: Request, res: Response) => {
     return res.status(400).json({ message: 'INTERNAL_SERVER_ERROR', data: e });
   }
 };
+
+export const logoutController = async (req: Request, res: Response) => {
+  try {
+    res.clearCookie('token');
+    res.status(200).json({ message: 'You are logged out', data: null });
+  } catch (e) {
+    return res.status(400).json({ message: 'INTERNAL_SERVER_ERROR', data: e });
+  }
+};
