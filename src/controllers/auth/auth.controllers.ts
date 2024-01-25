@@ -117,9 +117,7 @@ export const meController = async (req: Request, res: Response) => {
       where: { id: req.userId },
     });
 
-    if (!user) {
-      return res.status(401).json({ message: 'UNAUTHORIZED', data: null });
-    }
+    if (!user) return res.status(404).json({ message: 'USER_NOT_FOUND', data: null });
 
     const _user = excludeFields(user, ['password']);
 
