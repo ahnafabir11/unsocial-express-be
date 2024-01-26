@@ -32,11 +32,12 @@ model User {
 }
 
 model Follow {
-  id          String   @id @default(uuid())
   createdAt   DateTime @default(now())
   status      Status   @default(APPROVED)
   follower    User     @relation("Followers", fields: [followerId], references: [id])
   followerId  String
   following   User     @relation("Followings", fields: [followingId], references: [id])
   followingId String
+
+  @@unique([followerId, followingId])
 }
