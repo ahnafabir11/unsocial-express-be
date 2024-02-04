@@ -10,4 +10,8 @@ export const config = {
   jwtSecret: process.env.JWT_SECRET || 'YOUR_SECRET_KEY',
   resendApiKey: process.env.RESEND_API_KEY || 're_',
   clientOrigin: process.env.CLIENT_ORIGIN || 'http://localhost:300',
+  s3AccessKey: process.env.S3_ACCESS_KEY || '',
+  s3SecretKey: process.env.S3_SECRET_KEY || '',
+  s3BucketName: process.env.S3_BUCKET_NAME || '',
+  s3BucketRegion: process.env.S3_BUCKET_REGION || '',
 } as const;

@@ -9,7 +9,7 @@ const app = express();
 
 // initialize necessary middlewares
 app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 
 // testing endpoint
