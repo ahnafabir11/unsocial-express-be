@@ -99,6 +99,11 @@ export const loginController = async (req: Request, res: Response) => {
       return res.status(400).json({ message: 'VALIDATION_ERROR', data: { password: ["Password didn't match!"] } });
     }
 
+    // CHECK IF USER IS VERIFIED
+    if (!user.verified) {
+      return res.status(403).json({ message: 'NOT_VERIFIED', data: null });
+    }
+
     // PASSWORD MATCHED
     // GENERATING TOKEN FOR COOKIE
     const token = generateToken({ id: user.id, email: user.email });
