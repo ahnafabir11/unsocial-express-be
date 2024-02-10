@@ -8,6 +8,7 @@ import {
   resetPasswordController,
   resetPasswordRequestController,
 } from '@/controllers/auth/password.controllers';
+import { verifyController } from '@/controllers/auth/verify.controllers';
 
 const authRouter = Router();
 
@@ -21,5 +22,7 @@ authRouter.put('/auth/change-password', authentication, changePasswordController
 
 authRouter.post('/auth/reset-password', resetPasswordRequestController);
 authRouter.put('/auth/reset-password', resetPasswordController);
+
+authRouter.put('/auth/verify', verifyController);
 
 export { authRouter };
