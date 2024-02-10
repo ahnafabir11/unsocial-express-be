@@ -37,3 +37,21 @@ export const changePasswordBodySchema = z
   });
 
 export type ChangePasswordBodyType = z.infer<typeof changePasswordBodySchema>;
+
+export const resetPasswordRequestBodySchema = z.object({
+  email: z.string().toLowerCase().email(),
+});
+
+export type ResetPasswordRequestBodyType = z.infer<typeof resetPasswordRequestBodySchema>;
+
+export const resetPasswordBodySchema = z
+  .object({
+    password: z.string().trim().min(6),
+    confirmPassword: z.string().trim().min(6),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords didn't match!",
+    path: ['confirmPassword'],
+  });
+
+export type ResetPasswordBodyType = z.infer<typeof resetPasswordBodySchema>;
