@@ -1,6 +1,8 @@
-import express from 'express';
 import { router } from '@/routes';
 import cookieParser from 'cookie-parser';
+import cors from 'cors';
+import express from 'express';
+import { config } from './config';
 
 // define cors options
 
@@ -11,6 +13,12 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
+app.use(
+  cors({
+    credentials: true,
+    origin: [config.clientOrigin],
+  }),
+);
 
 // testing endpoint
 app.get('/', async (req, res) => {

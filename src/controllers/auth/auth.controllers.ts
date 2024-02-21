@@ -110,7 +110,10 @@ export const loginController = async (req: Request, res: Response) => {
 
     const _user = excludeFields(user, ['password']);
 
-    return res.status(200).cookie('token', token, { httpOnly: true }).json({ message: 'You are logged in', data: _user });
+    return res
+      .status(200)
+      .cookie('token', token, { httpOnly: true, maxAge: 1000 * 60 * 60 * 24 * 7 }) // 7 DAYS
+      .json({ message: 'You are logged in', data: _user });
   } catch (e) {
     return res.status(400).json({ message: 'INTERNAL_SERVER_ERROR', data: e });
   }
