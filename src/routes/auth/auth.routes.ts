@@ -15,9 +15,9 @@ const authRouter = Router();
 authRouter.post('/auth/signup', signupController);
 authRouter.post('/auth/login', loginController);
 authRouter.get('/auth/me', authentication, meController);
-authRouter.get('/auth/logout', authentication, logoutController);
+authRouter.put('/auth/logout', authentication, logoutController);
 
-authRouter.get('/auth/change-password', authentication, changePasswordRequestController);
+authRouter.post('/auth/change-password', authentication, changePasswordRequestController);
 authRouter.put('/auth/change-password', authentication, changePasswordController);
 
 authRouter.post('/auth/reset-password', resetPasswordRequestController);

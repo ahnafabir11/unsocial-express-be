@@ -8,7 +8,7 @@ const storage = multer.diskStorage({
     cb(null, 'public/temp');
   },
   filename: function (req, file, cb) {
-    cb(null, `${req.userId}.${file.mimetype.split('/')[1]}`);
+    cb(null, `${req.userId}-${file.originalname}.${file.mimetype.split('/')[1]}`);
   },
 });
 
@@ -21,7 +21,7 @@ const fileFilter: multer.Options['fileFilter'] = (req, file, cb) => {
 };
 
 const limits: multer.Options['limits'] = {
-  fileSize: 1024 * 1024, // MAX 1MB
+  fileSize: 1024 * 1024 * 5, // MAX 5MB
 };
 
 const upload = multer({ storage, fileFilter, limits });

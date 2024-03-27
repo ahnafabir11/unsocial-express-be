@@ -29,12 +29,12 @@ export const signupController = async (req: Request, res: Response) => {
     // EMAIL NOT FOUND
     // GENERATING TOKEN AND VERIFICATION LINK
     const token = generateToken({ fullName, email }, { expiresIn: '1h' });
-    const verificationLink = encodeURI(`${config.clientOrigin}/account/verify?token=${token}`);
+    const verificationLink = encodeURI(`${config.clientOrigin}/auth/verify-account?token=${token}`);
 
     // SENDING VERIFICATION LINK
     // USING RESEND (AN EMAIL API SERVICE)
     const { error: resendError } = await resend.emails.send({
-      from: 'Acme <onboarding@resend.dev>',
+      from: config.resendEmailAddress,
       to: [email],
       subject: 'Unsocial account verification',
       html: `
@@ -48,7 +48,7 @@ export const signupController = async (req: Request, res: Response) => {
 
     // FILED TO SEND VERIFICATION MAIL
     if (resendError) {
-      return res.status(400).json({ message: 'INTERNAL_SERVER_ERROR', data: resendError });
+      return res.status(500).json({ message: 'INTERNAL_SERVER_ERROR', data: resendError });
     }
 
     // EMAIL SENT
@@ -62,9 +62,9 @@ export const signupController = async (req: Request, res: Response) => {
 
     // USER CREATED SUCCESSFULLY
     // SENDING SUCCESS RESPONSE
-    return res.status(200).json({ message: 'Verify your email address.', data: _user });
+    return res.status(200).json({ message: 'VERIFY_EMAIL', data: _user });
   } catch (e) {
-    return res.status(400).json({ message: 'INTERNAL_SERVER_ERROR', data: e });
+    return res.status(500).json({ message: 'INTERNAL_SERVER_ERROR', data: e });
   }
 };
 
@@ -113,9 +113,9 @@ export const loginController = async (req: Request, res: Response) => {
     return res
       .status(200)
       .cookie('token', token, { httpOnly: true, maxAge: 1000 * 60 * 60 * 24 * 7 }) // 7 DAYS
-      .json({ message: 'You are logged in', data: _user });
+      .json({ message: 'LOGGED_IN', data: _user });
   } catch (e) {
-    return res.status(400).json({ message: 'INTERNAL_SERVER_ERROR', data: e });
+    return res.status(500).json({ message: 'INTERNAL_SERVER_ERROR', data: e });
   }
 };
 
@@ -129,17 +129,17 @@ export const meController = async (req: Request, res: Response) => {
 
     const _user = excludeFields(user, ['password']);
 
-    return res.status(200).json({ message: 'You are logged in', data: _user });
+    return res.status(200).json({ message: 'LOGGED_IN', data: _user });
   } catch (e) {
-    return res.status(400).json({ message: 'INTERNAL_SERVER_ERROR', data: e });
+    return res.status(500).json({ message: 'INTERNAL_SERVER_ERROR', data: e });
   }
 };
 
 export const logoutController = async (req: Request, res: Response) => {
   try {
     res.clearCookie('token');
-    res.status(200).json({ message: 'You are logged out', data: null });
+    res.status(200).json({ message: 'LOGGED_OUT', data: null });
   } catch (e) {
-    return res.status(400).json({ message: 'INTERNAL_SERVER_ERROR', data: e });
+    return res.status(500).json({ message: 'INTERNAL_SERVER_ERROR', data: e });
   }
 };

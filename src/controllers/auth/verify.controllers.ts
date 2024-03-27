@@ -12,7 +12,7 @@ export const verifyController = async (req: Request, res: Response) => {
 
     // TOKEN NOT FOUND
     // SENDING ERROR RESPONSE
-    if (!token) return res.status(401).json({ message: 'UNAUTHORIZED', data: null });
+    if (!token) return res.status(400).json({ message: 'INVALID_TOKEN', data: null });
 
     // VALIDATING TOKEN
     const { email } = <JwtTokenPayload>verifyToken(String(token));
@@ -25,8 +25,12 @@ export const verifyController = async (req: Request, res: Response) => {
 
     const _user = excludeFields(user, ['password']);
 
-    return res.status(200).json({ message: 'Verify your email address.', data: _user });
-  } catch (e) {
-    return res.status(400).json({ message: 'INTERNAL_SERVER_ERROR', data: e });
+    return res.status(200).json({ message: 'PROFILE_VERIFIED', data: _user });
+  } catch (e: any) {
+    if (e.name === 'JsonWebTokenError' || e.name === 'TokenExpiredError' || e.name === 'NotBeforeError') {
+      return res.status(400).json({ message: 'INVALID_TOKEN', data: null });
+    }
+
+    return res.status(500).json({ message: 'INTERNAL_SERVER_ERROR', data: e });
   }
 };

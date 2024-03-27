@@ -26,7 +26,7 @@ export const profileController = async (req: Request, res: Response) => {
 
     const _user = { ...excludeFields(user, ['password']), myself, followed };
 
-    return res.status(200).json({ message: 'Profile fetched!', data: _user });
+    return res.status(200).json({ message: 'PROFILE_FETCHED', data: _user });
   } catch (e) {
     return res.status(500).json({ message: 'INTERNAL_SERVER_ERROR', data: e });
   }
@@ -38,6 +38,9 @@ export const updateProfileController = async (req: Request, res: Response) => {
     const user = await db.user.findFirst({
       where: { id: req.userId },
     });
+
+    // USER NOT FOUND WITH GIVEN USER ID
+    if (!user) return res.status(404).json({ message: 'USER_NOT_FOUND', data: null });
 
     // VALIDATING REQUEST BODY
     const validation = updateProfileBodySchema.safeParse(req.body);
@@ -89,7 +92,7 @@ export const updateProfileController = async (req: Request, res: Response) => {
 
     const _user = excludeFields(updatedUser, ['password']);
 
-    return res.status(200).json({ message: 'Profile updated!', data: _user });
+    return res.status(200).json({ message: 'PROFILE_UPDATED', data: _user });
   } catch (e) {
     return res.status(500).json({ message: 'INTERNAL_SERVER_ERROR', data: e });
   }

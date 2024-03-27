@@ -23,7 +23,7 @@ export const changePasswordRequestController = async (req: Request, res: Respons
     // SENDING CHANGE PASSWORD LINK
     // USING RESEND (AN EMAIL API SERVICE)
     const { error: resendError } = await resend.emails.send({
-      from: 'Acme <onboarding@resend.dev>',
+      from: config.resendEmailAddress,
       to: [email],
       subject: 'Unsocial change password',
       html: `
@@ -37,12 +37,12 @@ export const changePasswordRequestController = async (req: Request, res: Respons
 
     // FILED TO SEND EMAIL
     if (resendError) {
-      return res.status(400).json({ message: 'INTERNAL_SERVER_ERROR', data: resendError });
+      return res.status(500).json({ message: 'INTERNAL_SERVER_ERROR', data: resendError });
     }
 
-    return res.status(200).json({ message: 'Check your email.', data: null });
+    return res.status(200).json({ message: 'EMAIL_SENT', data: null });
   } catch (e) {
-    return res.status(400).json({ message: 'INTERNAL_SERVER_ERROR', data: e });
+    return res.status(500).json({ message: 'INTERNAL_SERVER_ERROR', data: e });
   }
 };
 
@@ -53,7 +53,7 @@ export const changePasswordController = async (req: Request, res: Response) => {
 
     // TOKEN NOT FOUND
     // SENDING ERROR RESPONSE
-    if (!token) return res.status(401).json({ message: 'UNAUTHORIZED', data: null });
+    if (!token) return res.status(400).json({ message: 'INVALID_TOKEN', data: null });
 
     // VALIDATING TOKEN
     verifyToken(String(token));
@@ -95,9 +95,9 @@ export const changePasswordController = async (req: Request, res: Response) => {
 
     const _user = excludeFields(updatedUser, ['password']);
 
-    return res.status(200).json({ message: 'Password has been updated.', data: _user });
+    return res.status(200).json({ message: 'PASSWORD_UPDATED', data: _user });
   } catch (e) {
-    return res.status(400).json({ message: 'INTERNAL_SERVER_ERROR', data: e });
+    return res.status(500).json({ message: 'INTERNAL_SERVER_ERROR', data: e });
   }
 };
 
@@ -122,12 +122,12 @@ export const resetPasswordRequestController = async (req: Request, res: Response
     const { id, email, fullName } = user;
     const token = generateToken({ id, email }, { expiresIn: '1h' });
 
-    const resetPasswordLink = encodeURI(`${config.clientOrigin}/account/reset-password?token=${token}`);
+    const resetPasswordLink = encodeURI(`${config.clientOrigin}/auth/change-password?token=${token}`);
 
     // SENDING RESET PASSWORD LINK
     // USING RESEND (AN EMAIL API SERVICE)
     const { error: resendError } = await resend.emails.send({
-      from: 'Acme <onboarding@resend.dev>',
+      from: config.resendEmailAddress,
       to: [email],
       subject: 'Unsocial reset password',
       html: `
@@ -141,12 +141,12 @@ export const resetPasswordRequestController = async (req: Request, res: Response
 
     // FILED TO SEND EMAIL
     if (resendError) {
-      return res.status(400).json({ message: 'INTERNAL_SERVER_ERROR', data: resendError });
+      return res.status(500).json({ message: 'INTERNAL_SERVER_ERROR', data: resendError });
     }
 
-    return res.status(200).json({ message: 'Check your email.', data: null });
+    return res.status(200).json({ message: 'VERIFY_EMAIL', data: null });
   } catch (e) {
-    return res.status(400).json({ message: 'INTERNAL_SERVER_ERROR', data: e });
+    return res.status(500).json({ message: 'INTERNAL_SERVER_ERROR', data: e });
   }
 };
 
@@ -157,7 +157,7 @@ export const resetPasswordController = async (req: Request, res: Response) => {
 
     // TOKEN NOT FOUND
     // SENDING ERROR RESPONSE
-    if (!token) return res.status(401).json({ message: 'UNAUTHORIZED', data: null });
+    if (!token) return res.status(400).json({ message: 'INVALID_TOKEN', data: null });
 
     // VALIDATING TOKEN
     const { email } = <JwtTokenPayload>verifyToken(String(token));
@@ -175,15 +175,17 @@ export const resetPasswordController = async (req: Request, res: Response) => {
     // HASHING NEW PASSWORD
     const hashedPassword = await hashPassword(password);
 
-    const updatedUser = await db.user.update({
+    await db.user.update({
       where: { email },
       data: { password: hashedPassword },
     });
 
-    const _user = excludeFields(updatedUser, ['password']);
+    return res.status(200).json({ message: 'PASSWORD_UPDATED', data: null });
+  } catch (e: any) {
+    if (e.name === 'JsonWebTokenError' || e.name === 'TokenExpiredError' || e.name === 'NotBeforeError') {
+      return res.status(400).json({ message: 'INVALID_TOKEN', data: null });
+    }
 
-    return res.status(200).json({ message: 'Password has been updated.', data: _user });
-  } catch (e) {
-    return res.status(400).json({ message: 'INTERNAL_SERVER_ERROR', data: e });
+    return res.status(500).json({ message: 'INTERNAL_SERVER_ERROR', data: e });
   }
 };
